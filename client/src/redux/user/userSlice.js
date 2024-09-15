@@ -20,8 +20,8 @@ const userSlice=createSlice({
     signInFailure:(state,action)=>{
             state.error=action.payload;
             state.loading=false;
-    },
-},
+    }
+}
 });
 export const {signInStart,signInSuccess,signInFailure}=userSlice.actions;
 
