@@ -6,24 +6,47 @@ export const test = (req,res)=>{
         message:'Hello World!',
     })
 }
-
-export const updateUser=async(req,res,next)=>{
-    if(req.user.id!== req.params.id) return next(errorHandler(401,"You can only update your own account!"))
-        try{
-       if(req.body.password){
-        req.body.password=bcryptjs.hashSync(req.body.password,10)
-       }
-       const updateUser=await User.findByIdAndUpdate(req.params.id,{
-        $set:{
-            username:req.body.username,
-            email:req.body.email,
-            password:req.body.password,
-            avatar:req.body.avatar,
-       }
-    },{new:true})
-   const {password,...rest}=updateUser._doc
-   res.status(200).json(rest)
-  } catch(error){
-         next(error);
+export const updateUser = async (req, res, next) => {
+    // Check if the logged-in user is updating their own account
+    if (req.user.id !== req.params.id) {
+      return next(errorHandler(401, "You can only update your own account!"));
     }
-};
+  
+    try {
+      const updates = {};
+  
+      // Only add the fields to be updated if they are provided in the request body
+      if (req.body.username) {
+        updates.username = req.body.username;
+      }
+      if (req.body.email) {
+        updates.email = req.body.email;
+      }
+      if (req.body.avatar) {
+        updates.avatar = req.body.avatar;
+      }
+      if (req.body.password) {
+        updates.password = bcryptjs.hashSync(req.body.password, 10);
+      }
+  
+      // Perform the update
+      const updatedUser = await User.findByIdAndUpdate(
+        req.params.id,
+        { $set: updates },
+        { new: true }  // Return the updated document
+      );
+  
+      // Check if user was found and updated
+      if (!updatedUser) {
+        return next(errorHandler(404, "User not found"));
+      }
+  
+      // Exclude password from the response
+      const { password, ...rest } = updatedUser._doc;
+  
+      // Send the updated user object
+      res.status(200).json(rest);
+    } catch (error) {
+      next(error);
+    }
+  };
