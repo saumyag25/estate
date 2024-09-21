@@ -6,6 +6,7 @@ import { signInSuccess } from '../redux/user/userSlice'
 import { useNavigate } from 'react-router-dom'
 export default function Oauth() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const handleGoogleClick=async()=>{
     try{
         const provider= new GoogleAuthProvider()
@@ -20,7 +21,7 @@ export default function Oauth() {
         })
         const data=await res.json() 
         dispatch(signInSuccess(data));
-        Navigate('/')
+        navigate('/')
     }
     catch(error){
       console.log('Could not sign in with google',error)
