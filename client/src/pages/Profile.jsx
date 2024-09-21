@@ -3,8 +3,12 @@ import { useSelector } from 'react-redux'
 import { useRef } from 'react'
 import {getDownloadURL, getStorage,ref, uploadBytes, uploadBytesResumable} from 'firebase/storage'
 import {app} from '../firebase.js'
-import {updateUserStart,updateUserSuccess,updateUserFailure, deleteUserFailure, deleteUserStart, deleteUserSuccess} from '../redux/user/userSlice.js'
+import {updateUserStart,updateUserSuccess,updateUserFailure, deleteUserFailure, deleteUserStart, deleteUserSuccess, signOutUserStart} from '../redux/user/userSlice.js'
 import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom';
+
+// Inside your componen
+
 export default function Profile() {
   const fileRef=useRef(null); 
   const {currentUser,loading,error} = useSelector((state) => state.user)
@@ -14,6 +18,7 @@ export default function Profile() {
   const [formData,setFormData]= useState({});
   const [updateSuccess,setUpdateSuccess]=useState(false);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   console.log(formData)
   console.log(filePerc)
   console.log(file);
@@ -80,11 +85,25 @@ export default function Profile() {
         dispatch(deleteUserFailure(data.message));
         return;
       }
-      dispatch(deleteUserSuccess(data))
+      dispatch(deleteUserSuccess(data));
     } catch (error) {
-      dispatch(deleteUserFailure(error.message))
+      dispatch(deleteUserFailure(data.message))
     }
   }
+  const handleSignOut=async()=>{
+         try {
+          dispatch(signOutUserStart());
+          const res = await fetch('/api/auth/signout')
+           const data=await res.json();
+           if(data.success===false){
+            dispatch(deleteUserFailure(data.message));
+            return;
+            }
+            dispatch(deleteUserSuccess(data));
+         } catch (error) {
+           dispatch(deleteUserFailure(error.message))
+         }
+  };
   return (
     <div className='p-3 max-w-lg mx-auto'> 
       <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
@@ -117,7 +136,7 @@ export default function Profile() {
       </form>
        <div className='flex justify-between mt-5'>
         <span onClick={handleDeleteUser} className='text-red-700 cursor-pointer'>Delete account</span>
-        <span className='text-red -700 cursor-pointer'>Sign Out</span>
+        <span onClick={handleSignOut} className='text-red -700 cursor-pointer'>Sign Out</span>
        </div>
        <p className='text-green-700 mt-5'>{updateSuccess?'User is updated sucessfully':''}</p>
     </div>
