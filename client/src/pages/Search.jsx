@@ -135,7 +135,7 @@ export default function Search() {
                 <div className="flex items-center gap-2">
                     <label className='whitespace-nowrap '>Search Term:</label>
                     <input type="text" 
-                    id='seachTerm'
+                    id='searchTerm'
                     placeholder='Search...'
                     className="w-full p-3 border  rounded-lg
                     " value={sidebardata.searchTerm}
@@ -210,6 +210,14 @@ export default function Search() {
                     )
                 }
                 {!loading && listings && listings.map((listing)=><ListingItem key={listing._id} listing={listing}/>)}
+                {showMore && (
+            <button
+              onClick={onShowMoreClick}
+              className='text-green-700 hover:underline p-7 text-center w-full'
+            >
+              Show more
+            </button>
+          )}
             </div>
         </div>
     </div>
